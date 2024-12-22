@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find the Different Color Game</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+        h1 {
+            font-size: 2em;
+        }
+        #grid {
+            display: grid;
+            gap: 5px;
+        }
+        .square {
+            width: 50px;
+            height: 50px;
+            border-radius: 5px;
+        }
+        .message {
+            margin-top: 20px;
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+    <h1>Find the Different Color</h1>
+    <div id="grid"></div>
+    <div class="message" id="message"></div>
+
+    <script>
+        let level = 1;
+        const gridContainer = document.getElementById('grid');
+        const messageContainer = document.getElementById('message');
+
+        const pastelColors = [
+            '#FFB3BA', '#FFDFBA', '#FFFFBA', '#BAFFC9', '#BAE1FF',
+            '#E6E6FA', '#FFDAB9', '#E0FFFF', '#F0E68C', '#D8BFD8'
+        ];
+
+        function generateColor(baseColor, level) {
+            const color = parseInt(baseColor.slice(1), 16);
+            const variation = Math.max(1, 255 - level * 5);
+            const newColor = color + variation;
+
+            return `#${newColor.toString(16).padStart(6, '0')}`;
+        }
+
+        function createGrid(size) {
+            gridContainer.innerHTML = '';
+            gridContainer.style.gridTemplateColumns = `repeat(${size}, 50px)`;
+            gridContainer.style.gridTemplateRows = `repeat(${size}, 50px)`;
+
+            const baseColor = pastelColors[Math.floor(Math.random() * pastelColors.length)];
+            const differentColor = generateColor(baseColor, level);
+
+            const specialIndex = Math.floor(Math.random() * size * size);
+
+            for (let i = 0; i < size * size; i++) {
+                const square = document.createElement('div');
+                square.className = 'square';
+                square.style.backgroundColor = i === specialIndex ? `#${differentColor}` : baseColor;
+                square.addEventListener('click', () => handleSquareClick(i === specialIndex));
+                gridContainer.appendChild(square);
+            }
+        }
+
+        function handleSquareClick(isCorrect) {
+            if (isCorrect) {
+                level++;
+                messageContainer.textContent = "Congratulations! You found the different color!";
+                setTimeout(() => {
+                    messageContainer.textContent = '';
+                    createGrid(level + 2);
+                }, 1000);
+            } else {
+                level = 1;
+                messageContainer.textContent = "Wrong choice, restarting from level 1!";
+                setTimeout(() => {
+                    messageContainer.textContent = '';
+                    createGrid(level + 2);
+                }, 1000);
+            }
+        }
+
+        createGrid(level + 2);
+    </script>
+</body>
+</html>
