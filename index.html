@@ -37,6 +37,9 @@
     <div id="grid"></div>
     <div class="message" id="message"></div>
 
+    <!-- Confetti JS -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.min.js"></script>
+
     <script>
         let level = 1;
         const gridContainer = document.getElementById('grid');
@@ -47,12 +50,18 @@
             '#E6E6FA', '#FFDAB9', '#E0FFFF', '#F0E68C', '#D8BFD8'
         ];
 
-        function generateColor(baseColor, level) {
+        function generateSimilarColor(baseColor, level) {
             const color = parseInt(baseColor.slice(1), 16);
             const variation = Math.max(1, 255 - level * 5);
-            const newColor = color + variation;
+            const r = (color >> 16) & 0xFF;
+            const g = (color >> 8) & 0xFF;
+            const b = color & 0xFF;
 
-            return `#${newColor.toString(16).padStart(6, '0')}`;
+            const newR = Math.min(255, r + variation);
+            const newG = Math.min(255, g + variation);
+            const newB = Math.min(255, b + variation);
+
+            return `#${((newR << 16) | (newG << 8) | newB).toString(16).padStart(6, '0')}`;
         }
 
         function createGrid(size) {
@@ -61,14 +70,14 @@
             gridContainer.style.gridTemplateRows = `repeat(${size}, 50px)`;
 
             const baseColor = pastelColors[Math.floor(Math.random() * pastelColors.length)];
-            const differentColor = generateColor(baseColor, level);
+            const differentColor = generateSimilarColor(baseColor, level);
 
             const specialIndex = Math.floor(Math.random() * size * size);
 
             for (let i = 0; i < size * size; i++) {
                 const square = document.createElement('div');
                 square.className = 'square';
-                square.style.backgroundColor = i === specialIndex ? `#${differentColor}` : baseColor;
+                square.style.backgroundColor = i === specialIndex ? differentColor : baseColor;
                 square.addEventListener('click', () => handleSquareClick(i === specialIndex));
                 gridContainer.appendChild(square);
             }
@@ -78,6 +87,7 @@
             if (isCorrect) {
                 level++;
                 messageContainer.textContent = "Congratulations! You found the different color!";
+                confetti();
                 setTimeout(() => {
                     messageContainer.textContent = '';
                     createGrid(level + 2);
@@ -90,6 +100,30 @@
                     createGrid(level + 2);
                 }, 1000);
             }
+        }
+
+        function confetti() {
+            const duration = 2 * 1000;
+            const end = Date.now() + duration;
+
+            (function frame() {
+                confetti({
+                    particleCount: 6,
+                    angle: 60,
+                    spread: 55,
+                    origin: { x: 0 }
+                });
+                confetti({
+                    particleCount: 6,
+                    angle: 120,
+                    spread: 55,
+                    origin: { x: 1 }
+                });
+
+                if (Date.now() < end) {
+                    requestAnimationFrame(frame);
+                }
+            }());
         }
 
         createGrid(level + 2);
