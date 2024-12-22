@@ -50,18 +50,20 @@
             '#E6E6FA', '#FFDAB9', '#E0FFFF', '#F0E68C', '#D8BFD8'
         ];
 
+        // Generate a similar pastel color
         function generateSimilarColor(baseColor, level) {
             const color = parseInt(baseColor.slice(1), 16);
-            const variation = Math.max(1, 255 - level * 5);
             const r = (color >> 16) & 0xFF;
             const g = (color >> 8) & 0xFF;
             const b = color & 0xFF;
 
-            const newR = Math.min(255, r + variation);
-            const newG = Math.min(255, g + variation);
-            const newB = Math.min(255, b + variation);
+            // Adjust RGB values slightly to generate a similar color
+            const variation = 15 - level; // Decrease variation as level increases
+            const newR = Math.max(0, Math.min(255, r + Math.floor(Math.random() * variation) - variation / 2));
+            const newG = Math.max(0, Math.min(255, g + Math.floor(Math.random() * variation) - variation / 2));
+            const newB = Math.max(0, Math.min(255, b + Math.floor(Math.random() * variation) - variation / 2));
 
-            return `#${((newR << 16) | (newG << 8) | newB).toString(16).padStart(6, '0')}`;
+            return `#${((1 << 24) + (newR << 16) + (newG << 8) + newB).toString(16).slice(1)}`;
         }
 
         function createGrid(size) {
